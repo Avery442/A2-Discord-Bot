@@ -8,6 +8,8 @@ Basically you can either use the docker image
 
 avery442love/a2-discord-bot
 
+You'll have to setup the environment variables yourself. Check out the start.sh script and it'll teach you what environment variable names you need to set to what.
+
 or you can start it on windows, mac and linux using the start.bat and start.sh scripts. Make sure to modify them to have your required variables set.
 
 ## Example Response
