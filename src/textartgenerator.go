@@ -14,26 +14,61 @@ func GenerateStationTable(fleets []Fleet) string {
 
 	var rows []Row
 
-	// Collect top 3 stations by PlayerCount for each fleet
+	type FleetScore struct {
+		Fleet       Fleet
+		Score       int
+		TopStations []Station
+	}
+
+	var fleetScores []FleetScore
+
+	// Calculate fleet scores (sum of top 3 stations)
 	for _, fleet := range fleets {
 		// Sort stations by PlayerCount descending
 		sort.Slice(fleet.Stations, func(i, j int) bool {
 			return fleet.Stations[i].PlayerCount > fleet.Stations[j].PlayerCount
 		})
 
-		// Take up to top 3 stations
 		limit := 3
 		if len(fleet.Stations) < 3 {
 			limit = len(fleet.Stations)
 		}
 
-		for i := 0; i < limit; i++ {
-			station := fleet.Stations[i]
+		topStations := fleet.Stations[:limit]
+
+		score := 0
+		for _, s := range topStations {
+			score += s.PlayerCount
+		}
+
+		fleetScores = append(fleetScores, FleetScore{
+			Fleet:       fleet,
+			Score:       score,
+			TopStations: topStations,
+		})
+	}
+
+	// Sort fleets by total top 3 player counts descending
+	sort.Slice(fleetScores, func(i, j int) bool {
+		return fleetScores[i].Score > fleetScores[j].Score
+	})
+
+	// Fill rows with top stations, respecting the 16-station limit
+	totalStations := 0
+	for _, fs := range fleetScores {
+		for _, station := range fs.TopStations {
+			if totalStations >= 16 {
+				break
+			}
 			rows = append(rows, Row{
 				Name:        station.StationName,
 				Version:     station.Version,
 				PlayerCount: station.PlayerCount,
 			})
+			totalStations++
+		}
+		if totalStations >= 16 {
+			break
 		}
 	}
 
