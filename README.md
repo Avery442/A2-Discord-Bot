@@ -1,4 +1,6 @@
-# A2 Discord Bot
+# A2 Discord Bot - Improvements
+
+This improvements branch allows for multiple improvements without ruining the actual old nostalgic vibe of the original bot.
 
 This bot is a recreation of the Orion Drift A2 bot that used to serve information about the current players online in each fleet.
 
@@ -6,7 +8,7 @@ This bot is a recreation of the Orion Drift A2 bot that used to serve informatio
 
 Basically you can either use the docker image
 
-avery442love/a2-discord-bot
+avery442love/a2-discord-bot:improve
 
 or you can start it on windows, mac and linux using the start.bat and start.sh scripts. Make sure to modify them to have your required variables set.
 
