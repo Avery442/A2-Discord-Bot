@@ -2,12 +2,6 @@
 
 This bot is a recreation of the Orion Drift A2 bot that used to serve information about the current players online in each fleet.
 
-## Features
-
-* Retrieves and displays a table of online stations across various fleets.
-* Displays the top 16 stations based on player count.
-* Provides a visual representation of the bot's response.
-
 ## Requirements
 
 Before running the bot, ensure you have the following environment variables set:
