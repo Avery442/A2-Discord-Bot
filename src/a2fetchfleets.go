@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 type Response struct {
@@ -51,12 +49,12 @@ type Station struct {
 }
 
 func GetAllFleets() ([]Fleet, error) {
-	err := godotenv.Load()
+	// err := godotenv.Load()
 
-	if err != nil {
-		fmt.Println("Error loading dotenv file in a2fetchfleets.go!")
-		return nil, fmt.Errorf("Error loading dotenv file!")
-	}
+	// if err != nil {
+	// 	fmt.Println("Error loading dotenv file in a2fetchfleets.go!")
+	// 	return nil, fmt.Errorf("Error loading dotenv file!")
+	// }
 
 	req, err := http.NewRequest("GET", "https://a2-station-api-prod-708695367983.us-central1.run.app/v2/fleets?include_config=false&include_stations=true&include_offline_fleets=false&page_size=16&page=1", nil)
 

@@ -12,11 +12,15 @@ import (
 )
 
 func main() {
+	fmt.Println("Beginning init")
+
 	err := godotenv.Load()
 
-	if err != nil {
-		fmt.Println("Error loading .env file!")
-	}
+	// err := godotenv.Load()
+
+	// if err != nil {
+	// 	fmt.Println("Error loading .env file!")
+	// }
 
 	token := os.Getenv("TOKEN")
 
