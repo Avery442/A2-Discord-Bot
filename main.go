@@ -51,8 +51,10 @@ func main() {
 	})
 
 	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Content == "howmanyspacemonke" {
+		if m.Content == "howmanyspacemonke" || m.Content == "hotmanspacemike" {
 			fleets, err := src.GetAllFleets()
+
+			s.ChannelTyping(m.ChannelID)
 
 			if err != nil {
 				fmt.Println("Error getting fleets %v", err)

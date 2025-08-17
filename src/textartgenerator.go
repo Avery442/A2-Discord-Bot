@@ -71,24 +71,3 @@ func repeat(s string, n int) string {
 	}
 	return result
 }
-
-// Example usage
-func main() {
-	fleets := []Fleet{
-		{
-			FleetName: "Core",
-			Stations: []Station{
-				{StationName: "Core_Server", PlayerCount: 75, Version: "38962"},
-			},
-		},
-		{
-			FleetName: "Parkour",
-			Stations: []Station{
-				{StationName: "Parkour_Server", PlayerCount: 74, Version: "38962"},
-			},
-		},
-	}
-
-	table := GenerateStationTable(fleets)
-	fmt.Println(table)
-}

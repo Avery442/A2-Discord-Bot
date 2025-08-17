@@ -27,7 +27,6 @@ WORKDIR /app
 # Environment variables will be injected by Pterodactyl
 ENV TOKEN=""
 ENV A2_API_KEY=""
-ENV HOTMIKE=""
 
 # Start the bot
 CMD ["./a2bot"]
