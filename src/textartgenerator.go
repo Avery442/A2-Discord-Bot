@@ -2,6 +2,7 @@ package src
 
 import (
 	"fmt"
+	"sort"
 )
 
 func GenerateStationTable(fleets []Fleet) string {
@@ -13,20 +14,27 @@ func GenerateStationTable(fleets []Fleet) string {
 
 	var rows []Row
 
-	// Collect all stations in original order
+	// Collect top 3 stations by PlayerCount for each fleet
 	for _, fleet := range fleets {
-		for _, station := range fleet.Stations {
+		// Sort stations by PlayerCount descending
+		sort.Slice(fleet.Stations, func(i, j int) bool {
+			return fleet.Stations[i].PlayerCount > fleet.Stations[j].PlayerCount
+		})
+
+		// Take up to top 3 stations
+		limit := 3
+		if len(fleet.Stations) < 3 {
+			limit = len(fleet.Stations)
+		}
+
+		for i := 0; i < limit; i++ {
+			station := fleet.Stations[i]
 			rows = append(rows, Row{
 				Name:        station.StationName,
 				Version:     station.Version,
 				PlayerCount: station.PlayerCount,
 			})
 		}
-	}
-
-	// Limit to 16 stations total
-	if len(rows) > 16 {
-		rows = rows[:16]
 	}
 
 	// Determine column widths
