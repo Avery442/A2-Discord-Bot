@@ -51,7 +51,7 @@ func main() {
 	})
 
 	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Content == "howmanyspacemonke" || m.Content == "hotmanspacemike" {
+		if src.IsSimilar(m.Content, "howmanyspacemonke", 0.75) {
 			fleets, err := src.GetAllFleets()
 
 			s.ChannelTyping(m.ChannelID)
