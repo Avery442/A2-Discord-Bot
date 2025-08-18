@@ -1,19 +1,9 @@
 package src
 
 import (
-	"bytes"
 	"fmt"
-	"sort"
 	"strconv"
-	"strings"
 )
-
-// FleetScore holds a fleet and its top station scores
-type FleetScore struct {
-	Fleet       Fleet
-	Score       int
-	TopStations []Station
-}
 
 func GenerateStationTable(fleets []Fleet) string {
 	type Row struct {
@@ -23,60 +13,28 @@ func GenerateStationTable(fleets []Fleet) string {
 	}
 
 	var rows []Row
-	var fleetScores []FleetScore
 
-	// Collect top stations and calculate fleet scores
+	// Collect all stations in original order
 	for _, fleet := range fleets {
-		// Sort stations by PlayerCount descending
-		sort.Slice(fleet.Stations, func(i, j int) bool {
-			return fleet.Stations[i].PlayerCount > fleet.Stations[j].PlayerCount
-		})
-
-		limit := 3
-		if len(fleet.Stations) < 3 {
-			limit = len(fleet.Stations)
-		}
-
-		topStations := fleet.Stations[:limit]
-
-		score := 0
-		for _, s := range topStations {
-			score += s.PlayerCount
-		}
-
-		fleetScores = append(fleetScores, FleetScore{
-			Fleet:       fleet,
-			Score:       score,
-			TopStations: topStations,
-		})
-	}
-
-	// Sort fleets by total top 3 player counts descending
-	sort.Slice(fleetScores, func(i, j int) bool {
-		return fleetScores[i].Score > fleetScores[j].Score
-	})
-
-	// Fill rows with top stations, respecting the 16-station limit
-	totalStations := 0
-	for _, fs := range fleetScores {
-		for _, station := range fs.TopStations {
-			if totalStations >= 16 {
-				break
-			}
+		for _, station := range fleet.Stations {
 			rows = append(rows, Row{
 				Name:        station.StationName,
 				Version:     station.Version,
 				PlayerCount: station.PlayerCount,
 			})
-			totalStations++
-		}
-		if totalStations >= 16 {
-			break
 		}
 	}
 
+	// Limit to 16 stations total
+	if len(rows) > 16 {
+		rows = rows[:16]
+	}
+
 	// Determine column widths
-	maxNameLen, maxVersionLen, maxPlayerLen := 0, 0, 0
+	maxNameLen := 0
+	maxVersionLen := 0
+	maxPlayerLen := 0
+
 	for _, row := range rows {
 		if len(row.Name) > maxNameLen {
 			maxNameLen = len(row.Name)
@@ -84,37 +42,47 @@ func GenerateStationTable(fleets []Fleet) string {
 		if len(row.Version) > maxVersionLen {
 			maxVersionLen = len(row.Version)
 		}
-		if l := len(strconv.Itoa(row.PlayerCount)); l > maxPlayerLen {
-			maxPlayerLen = l
+		playerLen := len(strconv.Itoa(row.PlayerCount))
+		if playerLen > maxPlayerLen {
+			maxPlayerLen = playerLen
 		}
 	}
 
-	var buf bytes.Buffer
+	table := ""
 
-	// Function to write a border line
-	writeBorder := func() {
-		buf.WriteString(fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
-			strings.Repeat("-", maxNameLen),
-			strings.Repeat("-", maxVersionLen),
-			strings.Repeat("-", maxPlayerLen)))
-	}
+	// Top border
+	table += fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
+		repeat("-", maxNameLen),
+		repeat("-", maxVersionLen),
+		repeat("-", maxPlayerLen))
 
-	writeBorder() // top border
-
-	// Rows
+	// Data rows
 	for _, row := range rows {
-		buf.WriteString(fmt.Sprintf("| %s | %s | %s |\n",
+		table += fmt.Sprintf("| %s | %s | %s |\n",
 			center(row.Name, maxNameLen),
 			center(row.Version, maxVersionLen),
-			center(strconv.Itoa(row.PlayerCount), maxPlayerLen)))
+			center(strconv.Itoa(row.PlayerCount), maxPlayerLen))
 	}
 
-	writeBorder() // bottom border
+	// Bottom border
+	table += fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
+		repeat("-", maxNameLen),
+		repeat("-", maxVersionLen),
+		repeat("-", maxPlayerLen))
 
-	return buf.String()
+	return table
 }
 
-// center adds spaces to both sides to center the string in a cell
+// helper function to repeat strings
+func repeat(s string, n int) string {
+	result := ""
+	for i := 0; i < n; i++ {
+		result += s
+	}
+	return result
+}
+
+// helper function to center strings properly
 func center(s string, width int) string {
 	padding := width - len(s)
 	if padding <= 0 {
@@ -122,5 +90,5 @@ func center(s string, width int) string {
 	}
 	left := padding / 2
 	right := padding - left
-	return strings.Repeat(" ", left) + s + strings.Repeat(" ", right)
+	return fmt.Sprintf("%s%s%s", repeat(" ", left), s, repeat(" ", right))
 }
