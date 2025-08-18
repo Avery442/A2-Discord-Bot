@@ -86,20 +86,20 @@ func GenerateStationTable(fleets []Fleet) string {
 
 	table := ""
 	// Top border
-	table += fmt.Sprintf("+-%s-+-%s-+----+\n",
+	table += fmt.Sprintf("+-%s-+-%s-+------+\n",
 		repeat("-", maxNameLen),
 		repeat("-", maxVersionLen))
 
 	// Rows
 	for _, row := range rows {
-		table += fmt.Sprintf("| %-*s | %-*s | %-3d |\n",
-			maxNameLen, row.Name,
-			maxVersionLen, row.Version,
-			row.PlayerCount)
+		table += fmt.Sprintf("| %s | %s | %s |\n",
+			center(row.Name, maxNameLen),
+			center(row.Version, maxVersionLen),
+			center(fmt.Sprintf("%d", row.PlayerCount), 4))
 	}
 
 	// Bottom border
-	table += fmt.Sprintf("+-%s-+-%s-+----+\n",
+	table += fmt.Sprintf("+-%s-+-%s-+------+\n",
 		repeat("-", maxNameLen),
 		repeat("-", maxVersionLen))
 
@@ -113,4 +113,15 @@ func repeat(s string, n int) string {
 		result += s
 	}
 	return result
+}
+
+// helper function to center text
+func center(text string, width int) string {
+	if len(text) >= width {
+		return text
+	}
+	padding := width - len(text)
+	left := padding / 2
+	right := padding - left
+	return repeat(" ", left) + text + repeat(" ", right)
 }
