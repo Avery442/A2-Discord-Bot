@@ -2,7 +2,8 @@ package src
 
 import (
 	"fmt"
-	"strconv"
+	"sort"
+	"strings"
 )
 
 func GenerateStationTable(fleets []Fleet) string {
@@ -14,27 +15,67 @@ func GenerateStationTable(fleets []Fleet) string {
 
 	var rows []Row
 
-	// Collect all stations in original order
+	type FleetScore struct {
+		Fleet       Fleet
+		Score       int
+		TopStations []Station
+	}
+
+	var fleetScores []FleetScore
+
+	// Calculate fleet scores (sum of top 3 stations)
 	for _, fleet := range fleets {
-		for _, station := range fleet.Stations {
+		// Sort stations by PlayerCount descending
+		sort.Slice(fleet.Stations, func(i, j int) bool {
+			return fleet.Stations[i].PlayerCount > fleet.Stations[j].PlayerCount
+		})
+
+		limit := 3
+		if len(fleet.Stations) < 3 {
+			limit = len(fleet.Stations)
+		}
+
+		topStations := fleet.Stations[:limit]
+
+		score := 0
+		for _, s := range topStations {
+			score += s.PlayerCount
+		}
+
+		fleetScores = append(fleetScores, FleetScore{
+			Fleet:       fleet,
+			Score:       score,
+			TopStations: topStations,
+		})
+	}
+
+	// Sort fleets by total top 3 player counts descending
+	sort.Slice(fleetScores, func(i, j int) bool {
+		return fleetScores[i].Score > fleetScores[j].Score
+	})
+
+	// Fill rows with top stations, respecting the 16-station limit
+	totalStations := 0
+	for _, fs := range fleetScores {
+		for _, station := range fs.TopStations {
+			if totalStations >= 16 {
+				break
+			}
 			rows = append(rows, Row{
 				Name:        station.StationName,
 				Version:     station.Version,
 				PlayerCount: station.PlayerCount,
 			})
+			totalStations++
 		}
-	}
-
-	// Limit to 16 stations total
-	if len(rows) > 16 {
-		rows = rows[:16]
+		if totalStations >= 16 {
+			break
+		}
 	}
 
 	// Determine column widths
 	maxNameLen := 0
 	maxVersionLen := 0
-	maxPlayerLen := 0
-
 	for _, row := range rows {
 		if len(row.Name) > maxNameLen {
 			maxNameLen = len(row.Name)
@@ -42,53 +83,45 @@ func GenerateStationTable(fleets []Fleet) string {
 		if len(row.Version) > maxVersionLen {
 			maxVersionLen = len(row.Version)
 		}
-		playerLen := len(strconv.Itoa(row.PlayerCount))
-		if playerLen > maxPlayerLen {
-			maxPlayerLen = playerLen
-		}
 	}
 
+	// Table building
 	table := ""
-
 	// Top border
 	table += fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
 		repeat("-", maxNameLen),
 		repeat("-", maxVersionLen),
-		repeat("-", maxPlayerLen))
+		repeat("-", 3))
 
-	// Data rows
+	// Rows
 	for _, row := range rows {
 		table += fmt.Sprintf("| %s | %s | %s |\n",
 			center(row.Name, maxNameLen),
 			center(row.Version, maxVersionLen),
-			center(strconv.Itoa(row.PlayerCount), maxPlayerLen))
+			center(fmt.Sprintf("%d", row.PlayerCount), 3))
 	}
 
 	// Bottom border
 	table += fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
 		repeat("-", maxNameLen),
 		repeat("-", maxVersionLen),
-		repeat("-", maxPlayerLen))
+		repeat("-", 3))
 
 	return table
 }
 
 // helper function to repeat strings
 func repeat(s string, n int) string {
-	result := ""
-	for i := 0; i < n; i++ {
-		result += s
-	}
-	return result
+	return strings.Repeat(s, n)
 }
 
-// helper function to center strings properly
-func center(s string, width int) string {
-	padding := width - len(s)
-	if padding <= 0 {
-		return s
+// helper function to center text within a field of given width
+func center(text string, width int) string {
+	if len(text) >= width {
+		return text
 	}
+	padding := width - len(text)
 	left := padding / 2
 	right := padding - left
-	return fmt.Sprintf("%s%s%s", repeat(" ", left), s, repeat(" ", right))
+	return strings.Repeat(" ", left) + text + strings.Repeat(" ", right)
 }
