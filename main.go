@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -52,7 +51,7 @@ func main() {
 	})
 
 	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if strings.ToLower(m.Content) == "howmanyspacemonke" || strings.ToLower(m.Content) == "hotmanspacemike" {
+		if src.IsSimilar(m.Content, "howmanyspacemonke", 0.75) {
 			fleets, err := src.GetAllFleets()
 
 			s.ChannelTyping(m.ChannelID)
