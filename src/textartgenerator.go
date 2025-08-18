@@ -1,8 +1,14 @@
 package src
 
 import (
+	"bytes"
 	"fmt"
+<<<<<<< Updated upstream
 	"sort"
+=======
+	"strconv"
+	"strings"
+>>>>>>> Stashed changes
 )
 
 func GenerateStationTable(fleets []Fleet) string {
@@ -14,6 +20,7 @@ func GenerateStationTable(fleets []Fleet) string {
 
 	var rows []Row
 
+<<<<<<< Updated upstream
 	type FleetScore struct {
 		Fleet       Fleet
 		Score       int
@@ -23,6 +30,9 @@ func GenerateStationTable(fleets []Fleet) string {
 	var fleetScores []FleetScore
 
 	// Calculate fleet scores (sum of top 3 stations)
+=======
+	// Collect all stations
+>>>>>>> Stashed changes
 	for _, fleet := range fleets {
 		// Sort stations by PlayerCount descending
 		sort.Slice(fleet.Stations, func(i, j int) bool {
@@ -70,11 +80,22 @@ func GenerateStationTable(fleets []Fleet) string {
 		if totalStations >= 16 {
 			break
 		}
+<<<<<<< Updated upstream
 	}
 
 	// Determine column widths
 	maxNameLen := 0
 	maxVersionLen := 0
+=======
+	}
+
+	if len(rows) > 16 {
+		rows = rows[:16]
+	}
+
+	// Determine column widths
+	maxNameLen, maxVersionLen, maxPlayerLen := 0, 0, 0
+>>>>>>> Stashed changes
 	for _, row := range rows {
 		if len(row.Name) > maxNameLen {
 			maxNameLen = len(row.Name)
@@ -82,6 +103,7 @@ func GenerateStationTable(fleets []Fleet) string {
 		if len(row.Version) > maxVersionLen {
 			maxVersionLen = len(row.Version)
 		}
+<<<<<<< Updated upstream
 	}
 
 	table := ""
@@ -89,12 +111,31 @@ func GenerateStationTable(fleets []Fleet) string {
 	table += fmt.Sprintf("+-%s-+-%s-+------+\n",
 		repeat("-", maxNameLen),
 		repeat("-", maxVersionLen))
+=======
+		if l := len(strconv.Itoa(row.PlayerCount)); l > maxPlayerLen {
+			maxPlayerLen = l
+		}
+	}
+
+	var buf bytes.Buffer
+
+	// Function to write a border line
+	writeBorder := func() {
+		buf.WriteString(fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
+			strings.Repeat("-", maxNameLen),
+			strings.Repeat("-", maxVersionLen),
+			strings.Repeat("-", maxPlayerLen)))
+	}
+
+	writeBorder() // top border
+>>>>>>> Stashed changes
 
 	// Rows
 	for _, row := range rows {
-		table += fmt.Sprintf("| %s | %s | %s |\n",
+		buf.WriteString(fmt.Sprintf("| %s | %s | %s |\n",
 			center(row.Name, maxNameLen),
 			center(row.Version, maxVersionLen),
+<<<<<<< Updated upstream
 			center(fmt.Sprintf("%d", row.PlayerCount), 4))
 	}
 
@@ -102,10 +143,17 @@ func GenerateStationTable(fleets []Fleet) string {
 	table += fmt.Sprintf("+-%s-+-%s-+------+\n",
 		repeat("-", maxNameLen),
 		repeat("-", maxVersionLen))
+=======
+			center(strconv.Itoa(row.PlayerCount), maxPlayerLen)))
+	}
 
-	return table
+	writeBorder() // bottom border
+>>>>>>> Stashed changes
+
+	return buf.String()
 }
 
+<<<<<<< Updated upstream
 // helper function to repeat strings
 func repeat(s string, n int) string {
 	result := ""
@@ -119,9 +167,20 @@ func repeat(s string, n int) string {
 func center(text string, width int) string {
 	if len(text) >= width {
 		return text
+=======
+// center adds spaces to both sides to center the string in a cell
+func center(s string, width int) string {
+	padding := width - len(s)
+	if padding <= 0 {
+		return s
+>>>>>>> Stashed changes
 	}
 	padding := width - len(text)
 	left := padding / 2
 	right := padding - left
+<<<<<<< Updated upstream
 	return repeat(" ", left) + text + repeat(" ", right)
+=======
+	return strings.Repeat(" ", left) + s + strings.Repeat(" ", right)
+>>>>>>> Stashed changes
 }
