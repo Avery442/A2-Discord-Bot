@@ -2,6 +2,7 @@ package src
 
 import (
 	"fmt"
+	"strconv"
 )
 
 func GenerateStationTable(fleets []Fleet) string {
@@ -32,6 +33,8 @@ func GenerateStationTable(fleets []Fleet) string {
 	// Determine column widths
 	maxNameLen := 0
 	maxVersionLen := 0
+	maxPlayerLen := 0
+
 	for _, row := range rows {
 		if len(row.Name) > maxNameLen {
 			maxNameLen = len(row.Name)
@@ -39,26 +42,33 @@ func GenerateStationTable(fleets []Fleet) string {
 		if len(row.Version) > maxVersionLen {
 			maxVersionLen = len(row.Version)
 		}
+		playerLen := len(strconv.Itoa(row.PlayerCount))
+		if playerLen > maxPlayerLen {
+			maxPlayerLen = playerLen
+		}
 	}
 
 	table := ""
-	// Top border
-	table += fmt.Sprintf("+-%s-+-%s-+----+\n",
-		repeat("-", maxNameLen),
-		repeat("-", maxVersionLen))
 
-	// Rows
+	// Top border
+	table += fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
+		repeat("-", maxNameLen),
+		repeat("-", maxVersionLen),
+		repeat("-", maxPlayerLen))
+
+	// Data rows
 	for _, row := range rows {
-		table += fmt.Sprintf("| %-*s | %-*s | %-3d |\n",
-			maxNameLen, row.Name,
-			maxVersionLen, row.Version,
-			row.PlayerCount)
+		table += fmt.Sprintf("| %s | %s | %s |\n",
+			center(row.Name, maxNameLen),
+			center(row.Version, maxVersionLen),
+			center(strconv.Itoa(row.PlayerCount), maxPlayerLen))
 	}
 
 	// Bottom border
-	table += fmt.Sprintf("+-%s-+-%s-+----+\n",
+	table += fmt.Sprintf("+-%s-+-%s-+-%s-+\n",
 		repeat("-", maxNameLen),
-		repeat("-", maxVersionLen))
+		repeat("-", maxVersionLen),
+		repeat("-", maxPlayerLen))
 
 	return table
 }
@@ -70,4 +80,15 @@ func repeat(s string, n int) string {
 		result += s
 	}
 	return result
+}
+
+// helper function to center strings properly
+func center(s string, width int) string {
+	padding := width - len(s)
+	if padding <= 0 {
+		return s
+	}
+	left := padding / 2
+	right := padding - left
+	return fmt.Sprintf("%s%s%s", repeat(" ", left), s, repeat(" ", right))
 }
