@@ -3,7 +3,6 @@ package src
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -49,48 +48,36 @@ type Station struct {
 }
 
 func GetAllFleets() ([]Fleet, error) {
-	// err := godotenv.Load()
+	apiKey := os.Getenv("A2_API_KEY")
 
-	// if err != nil {
-	// 	fmt.Println("Error loading dotenv file in a2fetchfleets.go!")
-	// 	return nil, fmt.Errorf("Error loading dotenv file!")
-	// }
-
-	req, err := http.NewRequest("GET", "https://a2-station-api-prod-708695367983.us-central1.run.app/v2/fleets?include_config=false&include_stations=true&include_offline_fleets=false&page_size=16&page=1", nil)
-
+	req, err := http.NewRequest("GET",
+		"https://a2-station-api-prod-708695367983.us-central1.run.app/v2/fleets?include_config=false&include_stations=true&include_offline_fleets=false&page_size=16&page=1",
+		nil)
 	if err != nil {
-		fmt.Println("Error creating request in a2fetchfleets.go:", err)
-		return nil, fmt.Errorf("Error creating request: %w", err)
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	req.Header.Set("x-api-key", os.Getenv("A2_API_KEY"))
+	req.Header.Set("x-api-key", apiKey)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
 	resp, err := client.Do(req)
-
 	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return nil, fmt.Errorf("There was an error sending the request: ", err)
+		return nil, fmt.Errorf("error sending request: %w", err)
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("bad status: %s", resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		fmt.Println("Error reading response: ", err)
-		return nil, fmt.Errorf("There was an error reading the body --> ", err)
-	}
-
 	var response Response
-	if err := json.Unmarshal(body, &response); err != nil {
+	decoder := json.NewDecoder(resp.Body)
+	if err := decoder.Decode(&response); err != nil {
 		return nil, fmt.Errorf("decoding JSON failure: %v", err)
 	}
 
 	return response.Items, nil
-
 }
