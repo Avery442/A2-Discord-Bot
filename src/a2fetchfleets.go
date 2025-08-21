@@ -70,7 +70,7 @@ func GetAllFleets() ([]Fleet, error) {
 
 	if err != nil {
 		fmt.Println("Error sending request:", err)
-		return nil, fmt.Errorf("There was an error sending the request: ", err)
+		return nil, fmt.Errorf("There was an error sending the request: %w", err)
 	}
 
 	defer resp.Body.Close()
@@ -83,7 +83,7 @@ func GetAllFleets() ([]Fleet, error) {
 
 	if err != nil {
 		fmt.Println("Error reading response: ", err)
-		return nil, fmt.Errorf("There was an error reading the body --> ", err)
+		return nil, fmt.Errorf("There was an error reading the body --> %w", err)
 	}
 
 	var response Response

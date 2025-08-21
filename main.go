@@ -57,7 +57,7 @@ func main() {
 			s.ChannelTyping(m.ChannelID)
 
 			if err != nil {
-				fmt.Println("Error getting fleets %v", err)
+				fmt.Printf("Error getting fleets %v", err)
 				return
 			}
 
