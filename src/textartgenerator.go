@@ -5,13 +5,41 @@ import (
 	"strconv"
 )
 
+type Row struct {
+	Name        string
+	Version     string
+	PlayerCount int
+}
+
 func GenerateStationTable(fleets []Fleet) string {
-	type Row struct {
-		Name        string
-		Version     string
-		PlayerCount int
+	// For backward compatibility, maintain the original 16-station limit
+	var rows []Row
+
+	// Collect all stations in original order
+	for _, fleet := range fleets {
+		for _, station := range fleet.Stations {
+			if len(rows) >= 16 {
+				break // Limit to 16 stations total
+			}
+			rows = append(rows, Row{
+				Name:        station.StationName,
+				Version:     station.Version,
+				PlayerCount: station.PlayerCount,
+			})
+		}
+		if len(rows) >= 16 {
+			break
+		}
 	}
 
+	if len(rows) == 0 {
+		return ""
+	}
+
+	return generateTableFromRows(rows)
+}
+
+func GenerateStationTables(fleets []Fleet, stationsPerTable int) []string {
 	var rows []Row
 
 	// Collect all stations in original order
@@ -25,9 +53,30 @@ func GenerateStationTable(fleets []Fleet) string {
 		}
 	}
 
-	// Limit to 16 stations total
-	if len(rows) > 16 {
-		rows = rows[:16]
+	if len(rows) == 0 {
+		return []string{}
+	}
+
+	var tables []string
+
+	// Process stations in chunks
+	for i := 0; i < len(rows); i += stationsPerTable {
+		end := i + stationsPerTable
+		if end > len(rows) {
+			end = len(rows)
+		}
+
+		chunk := rows[i:end]
+		table := generateTableFromRows(chunk)
+		tables = append(tables, table)
+	}
+
+	return tables
+}
+
+func generateTableFromRows(rows []Row) string {
+	if len(rows) == 0 {
+		return ""
 	}
 
 	// Determine column widths

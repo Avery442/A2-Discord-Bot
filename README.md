@@ -12,6 +12,18 @@ You'll have to setup the environment variables yourself. Check out the start.sh 
 
 or you can start it on windows, mac and linux using the start.bat and start.sh scripts. Make sure to modify them to have your required variables set.
 
+## Usage
+
+The bot responds to messages similar to "howmanyspacemonke" with server information.
+
+### Normal Mode
+Type `howmanyspacemonke` (or similar) to get a table showing up to 16 servers.
+
+### Bulk Mode
+Type `!howmanyspacemonke` (with "!" prefix) to get ALL available servers shown in multiple messages with 16 servers per message. 
+
+**Note:** Bulk mode has a 1-minute cooldown per channel to prevent spam.
+
 ## Example Response
 
 ![Bot Response Example](assets/Howmanyspacemonke_example.png)
