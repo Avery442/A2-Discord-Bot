@@ -85,6 +85,7 @@ func getFleets(page int, pageSize int) ([]Fleet, error) {
 	if err != nil {
 		fmt.Println("Error reading response: ", err)
 		return nil, fmt.Errorf("There was an error reading the body: %v", err)
+
 	}
 
 	var response Response
