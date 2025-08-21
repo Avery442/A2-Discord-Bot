@@ -5,13 +5,21 @@ import (
 	"strconv"
 )
 
-func GenerateStationTable(fleets []Fleet) string {
-	type Row struct {
-		Name        string
-		Version     string
-		PlayerCount int
-	}
+type Row struct {
+	Name        string
+	Version     string
+	PlayerCount int
+}
 
+func GenerateStationTable(fleets []Fleet) string {
+	tables := GenerateStationTables(fleets, 16)
+	if len(tables) > 0 {
+		return tables[0] // Return first table for backward compatibility
+	}
+	return ""
+}
+
+func GenerateStationTables(fleets []Fleet, stationsPerTable int) []string {
 	var rows []Row
 
 	// Collect all stations in original order
@@ -25,9 +33,30 @@ func GenerateStationTable(fleets []Fleet) string {
 		}
 	}
 
-	// Limit to 16 stations total
-	if len(rows) > 16 {
-		rows = rows[:16]
+	if len(rows) == 0 {
+		return []string{}
+	}
+
+	var tables []string
+
+	// Process stations in chunks
+	for i := 0; i < len(rows); i += stationsPerTable {
+		end := i + stationsPerTable
+		if end > len(rows) {
+			end = len(rows)
+		}
+
+		chunk := rows[i:end]
+		table := generateTableFromRows(chunk)
+		tables = append(tables, table)
+	}
+
+	return tables
+}
+
+func generateTableFromRows(rows []Row) string {
+	if len(rows) == 0 {
+		return ""
 	}
 
 	// Determine column widths

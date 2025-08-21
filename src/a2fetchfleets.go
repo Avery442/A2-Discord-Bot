@@ -49,15 +49,18 @@ type Station struct {
 }
 
 func GetAllFleets() ([]Fleet, error) {
-	// err := godotenv.Load()
+	return getFleets(1, 16) // Get first page with 16 items (original behavior)
+}
 
-	// if err != nil {
-	// 	fmt.Println("Error loading dotenv file in a2fetchfleets.go!")
-	// 	return nil, fmt.Errorf("Error loading dotenv file!")
-	// }
+func GetAllFleetsAllPages() ([]Fleet, error) {
+	return getFleets(1, 100) // Start with larger page size and get all pages
+}
 
-	req, err := http.NewRequest("GET", "https://a2-station-api-prod-708695367983.us-central1.run.app/v2/fleets?include_config=false&include_stations=true&include_offline_fleets=false&page_size=16&page=1", nil)
+func getFleets(page int, pageSize int) ([]Fleet, error) {
+	baseURL := "https://a2-station-api-prod-708695367983.us-central1.run.app/v2/fleets"
+	url := fmt.Sprintf("%s?include_config=false&include_stations=true&include_offline_fleets=false&page_size=%d&page=%d", baseURL, pageSize, page)
 
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error creating request in a2fetchfleets.go:", err)
 		return nil, fmt.Errorf("Error creating request: %w", err)
@@ -67,10 +70,9 @@ func GetAllFleets() ([]Fleet, error) {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-
 	if err != nil {
 		fmt.Println("Error sending request:", err)
-		return nil, fmt.Errorf("There was an error sending the request: ", err)
+		return nil, fmt.Errorf("There was an error sending the request: %v", err)
 	}
 
 	defer resp.Body.Close()
@@ -80,10 +82,9 @@ func GetAllFleets() ([]Fleet, error) {
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
-
 	if err != nil {
 		fmt.Println("Error reading response: ", err)
-		return nil, fmt.Errorf("There was an error reading the body --> ", err)
+		return nil, fmt.Errorf("There was an error reading the body: %v", err)
 	}
 
 	var response Response
@@ -91,6 +92,19 @@ func GetAllFleets() ([]Fleet, error) {
 		return nil, fmt.Errorf("decoding JSON failure: %v", err)
 	}
 
-	return response.Items, nil
+	allFleets := response.Items
 
+	// If this is the bulk fetch and there are more pages, get them all
+	if pageSize > 16 && response.Page.Pages > 1 {
+		for currentPage := 2; currentPage <= response.Page.Pages; currentPage++ {
+			additionalFleets, err := getFleets(currentPage, pageSize)
+			if err != nil {
+				fmt.Printf("Error fetching page %d: %v\n", currentPage, err)
+				continue // Continue with other pages even if one fails
+			}
+			allFleets = append(allFleets, additionalFleets...)
+		}
+	}
+
+	return allFleets, nil
 }
