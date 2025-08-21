@@ -49,11 +49,7 @@ type Station struct {
 }
 
 func GetAllFleets() ([]Fleet, error) {
-	return getFleets(1, 16) // Get first page with 16 items (original behavior)
-}
-
-func GetAllFleetsAllPages() ([]Fleet, error) {
-	return getFleets(1, 100) // Start with larger page size and get all pages
+	return getFleets(1, 16) // Get first page with 16 items
 }
 
 func getFleets(page int, pageSize int) ([]Fleet, error) {
@@ -93,19 +89,5 @@ func getFleets(page int, pageSize int) ([]Fleet, error) {
 		return nil, fmt.Errorf("decoding JSON failure: %v", err)
 	}
 
-	allFleets := response.Items
-
-	// If this is the bulk fetch and there are more pages, get them all
-	if pageSize > 16 && response.Page.Pages > 1 {
-		for currentPage := 2; currentPage <= response.Page.Pages; currentPage++ {
-			additionalFleets, err := getFleets(currentPage, pageSize)
-			if err != nil {
-				fmt.Printf("Error fetching page %d: %v\n", currentPage, err)
-				continue // Continue with other pages even if one fails
-			}
-			allFleets = append(allFleets, additionalFleets...)
-		}
-	}
-
-	return allFleets, nil
+	return response.Items, nil
 }
