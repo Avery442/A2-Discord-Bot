@@ -12,11 +12,31 @@ type Row struct {
 }
 
 func GenerateStationTable(fleets []Fleet) string {
-	tables := GenerateStationTables(fleets, 16)
-	if len(tables) > 0 {
-		return tables[0] // Return first table for backward compatibility
+	// For backward compatibility, maintain the original 16-station limit
+	var rows []Row
+
+	// Collect all stations in original order
+	for _, fleet := range fleets {
+		for _, station := range fleet.Stations {
+			if len(rows) >= 16 {
+				break // Limit to 16 stations total
+			}
+			rows = append(rows, Row{
+				Name:        station.StationName,
+				Version:     station.Version,
+				PlayerCount: station.PlayerCount,
+			})
+		}
+		if len(rows) >= 16 {
+			break
+		}
 	}
-	return ""
+
+	if len(rows) == 0 {
+		return ""
+	}
+
+	return generateTableFromRows(rows)
 }
 
 func GenerateStationTables(fleets []Fleet, stationsPerTable int) []string {

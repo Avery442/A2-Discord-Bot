@@ -117,6 +117,10 @@ func main() {
 			} else {
 				// Normal mode - single table, limit to 16 stations
 				parsedFleets := src.GenerateStationTable(fleets)
+				if parsedFleets == "" {
+					s.ChannelMessageSend(m.ChannelID, "No servers found.")
+					return
+				}
 				fmt.Println(parsedFleets)
 				codeBlock := fmt.Sprintf("```\n%s\n```", parsedFleets)
 				s.ChannelMessageSend(m.ChannelID, codeBlock)
